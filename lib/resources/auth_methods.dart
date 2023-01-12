@@ -3,10 +3,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_flutter/resources/storage_methods.dart';
+import 'package:instagram_clone_flutter/models/user.dart' as model;
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<model.User> getUserDetails() async {
+    User currentUser = _auth.currentUser!;
+
+    DocumentSnapshot snap = await _firestore.collection('users').doc(currentUser.uid).get();
+    return model.User.fromSnap(snap);
+  }
 
   //sign up user
   Future<String> signUpUser({
@@ -18,7 +26,9 @@ class AuthMethods {
   }) async {
     String res = "Some Error Occurred";
     try {
-      if (email.isNotEmpty || password.isNotEmpty || username.isNotEmpty ||
+      if (email.isNotEmpty ||
+          password.isNotEmpty ||
+          username.isNotEmpty ||
           bio.isNotEmpty) {
         //register user
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
@@ -26,18 +36,22 @@ class AuthMethods {
 
         print(cred.user!.uid);
 
-        String photoUrl = await StorageMethods().uploadImageToStorage(
-            'profilePics', file, false);
+        String photoUrl = await StorageMethods()
+            .uploadImageToStorage('profilePics', file, false);
 
-        await _firestore.collection('users').doc(cred.user!.uid).set({
-          'username': username,
-          'uid': cred.user!.uid,
-          'email': email,
-          'bio': bio,
-          'followers': [],
-          'following': [],
-          'photoUrl': photoUrl,
-        });
+        model.User user = model.User(
+          username: username,
+          uid: cred.user!.uid,
+          email: email,
+          bio: bio,
+          followers: [],
+          following: [],
+          photoUrl: photoUrl,
+        );
+
+        await _firestore.collection('users').doc(cred.user!.uid).set(
+              user.toJson(),
+            );
         res = "Success Sign In";
       }
     } on FirebaseAuthException catch (err) {
@@ -48,8 +62,7 @@ class AuthMethods {
       } else if (err.code == 'weak-password') {
         res = "Weak Password";
       }
-    }
-    catch (err) {
+    } catch (err) {
       res = err.toString();
     }
     return res;
@@ -74,8 +87,7 @@ class AuthMethods {
       } else if (err.code == 'wrong-password') {
         res = "Wrong Password";
       }
-    }
-    catch (err) {
+    } catch (err) {
       res = err.toString();
     }
     return res;
