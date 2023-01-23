@@ -13,7 +13,6 @@ class TextFieldInput extends StatelessWidget {
       borderSide: Divider.createBorderSide(context)
     );
     return TextField(
-
       controller: textEditingController,
       decoration: InputDecoration(
         hintText: hintText,
