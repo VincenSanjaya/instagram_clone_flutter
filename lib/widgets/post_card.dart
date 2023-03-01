@@ -84,7 +84,10 @@ class _PostCardState extends State<PostCard> {
                                 'Delete',
                               ]
                                   .map((e) => InkWell(
-                                        onTap: () {},
+                                        onTap: () async {
+                                          FirestroreMethods().deletePost(widget.snap['postId']);
+                                        Navigator.pop(context);
+                                        },
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 16, vertical: 12),

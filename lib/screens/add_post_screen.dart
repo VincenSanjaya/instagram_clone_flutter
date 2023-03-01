@@ -20,7 +20,7 @@ class AddPostScreen extends StatefulWidget {
 class _AddPostScreenState extends State<AddPostScreen> {
   Uint8List? _file;
   final TextEditingController _descriptionController = TextEditingController();
-  bool _isLoading = false;
+  bool isLoading = false;
 
   void postImage(
     String uid,
@@ -28,7 +28,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     String profImage,
   ) async {
     setState(() {
-      _isLoading = true;
+      isLoading = true;
     });
     try {
       String res = await FirestroreMethods().uploadPost(
@@ -41,13 +41,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
       if (res == "success") {
         setState(() {
-          _isLoading = false;
+          isLoading = false;
         });
         showSnackBar('Posted!', context);
         clearImage();
       } else {
         setState(() {
-          _isLoading = false;
+          isLoading = false;
         });
         showSnackBar(res, context);
       }
@@ -145,7 +145,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
             ),
             body: Column(
               children: [
-                _isLoading? const LinearProgressIndicator() : const Padding(padding: EdgeInsets.only(top: 0)),
+                isLoading? const LinearProgressIndicator() : const Padding(padding: EdgeInsets.only(top: 0)),
                 const Divider(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
