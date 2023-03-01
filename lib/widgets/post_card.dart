@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_flutter/provider/user_provider.dart';
 import 'package:instagram_clone_flutter/resources/firestore_method.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
+import 'package:instagram_clone_flutter/utils/utils.dart';
 import 'package:instagram_clone_flutter/widgets/like_animation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/user.dart';
+import '../screens/comments_screen.dart';
 
 class PostCard extends StatefulWidget {
   final snap;
@@ -18,6 +21,26 @@ class PostCard extends StatefulWidget {
 
 class _PostCardState extends State<PostCard> {
   bool isLikeAnimating = false;
+  int commentLen = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    getComments();
+  }
+
+  void getComments() async {
+   try {
+     QuerySnapshot snap = await FirebaseFirestore.instance.collection('posts').doc(widget.snap['postId']).collection('comments').get();
+     commentLen = snap.docs.length;
+  } catch(e) {
+     showSnackBar(e.toString(), context);
+   }
+   setState(() {
+
+   });
+  }
+
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<UserProvider>(context).getUser;
@@ -137,7 +160,9 @@ class _PostCardState extends State<PostCard> {
                   isAnimating: widget.snap['likes'].contains(user.uid),
               smallLike: true,),
               IconButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => CommentsScreen(
+                    snap: widget.snap,
+                  ))),
                   icon: Icon(
                     Icons.mode_comment_outlined,
                   )),
@@ -198,7 +223,7 @@ class _PostCardState extends State<PostCard> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
-                        "View all 1,231 comments",
+                        "View all $commentLen comments",
                         style: TextStyle(color: secondaryColor, fontSize: 16),
                       ),
                     ),
